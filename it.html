@@ -1,1 +1,290 @@
+```html
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>/board</title>
 
+<style>
+  :root {
+    color-scheme: dark;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: #0e0e10;
+    color: #e4e4e7;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(14,14,16,.9);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #27272a;
+  }
+
+  .bar {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+  }
+
+  h1 {
+    margin: 0;
+    font: 600 16px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: -.01em;
+  }
+
+  h1 span {
+    color: #f97316;
+  }
+
+  .count {
+    font-size: 12px;
+    color: #71717a;
+  }
+
+  main {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 14px;
+  }
+
+  .message {
+    margin-bottom: 14px;
+    padding: 16px;
+    border: 1px solid #27272a;
+    background: #18181b;
+    border-radius: 8px;
+    line-height: 1.6;
+    color: #d4d4d8;
+    word-break: break-word;
+    white-space: pre-wrap;
+  }
+
+  .message-title {
+    color: #fb923c;
+    font: 600 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 10px;
+  }
+
+  .grid {
+    column-count: 2;
+    column-gap: 10px;
+  }
+
+  @media (min-width: 640px) {
+    .grid {
+      column-count: 3;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .grid {
+      column-count: 4;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .grid {
+      column-count: 5;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .grid {
+      column-count: 6;
+    }
+  }
+
+  .item {
+    display: block;
+    width: 100%;
+    margin: 0 0 10px;
+    padding: 0;
+    border: 1px solid #27272a;
+    background: #18181b;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    break-inside: avoid;
+    position: relative;
+  }
+
+  .item img,
+  .item video {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform .3s, opacity .3s;
+  }
+
+  .item:hover img,
+  .item:hover video {
+    transform: scale(1.02);
+    opacity: .9;
+  }
+
+  .item:focus {
+    outline: 2px solid #f97316;
+    outline-offset: 2px;
+  }
+
+  .tag {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(0,0,0,.7);
+    color: #fb923c;
+    font: 600 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    padding: 4px 6px;
+    border-radius: 3px;
+  }
+
+  #lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,.92);
+    padding: 16px;
+  }
+
+  #lightbox.open {
+    display: flex;
+  }
+
+  #lightbox > * {
+    max-width: 92vw;
+    max-height: 92vh;
+    border-radius: 6px;
+  }
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="bar">
+    <h1><span>/</span>board</h1>
+    <span class="count" id="count"></span>
+  </div>
+</header>
+
+<main>
+
+  <div class="message">
+    <div class="message-title">message</div>
+    <div id="messageText"></div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+</main>
+
+<div id="lightbox"></div>
+
+<script>
+  const message =
+`linqor the ukrainian skid, ghost the russian skid.
+ghost name is zhenya trofimov.
+he owns ghost hub.
+
+linqor owns getlqn.space
+
+linqor cheat got cracked in 2 minutes
+u can use the crack in discord.gg/constant
+
+ghost hub source leaks can be found here >
+
+https://github.com/ewghost/ghost-leak-criminality
+
+https://github.com/ewghost/lqn-leak/blob/main/Criminality.lua`;
+
+  const media = [
+    { type: "image", url: "https://i.imgur.com/YI6ievQ.png" },
+    { type: "image", url: "https://i.imgur.com/Z6CleXj.png" },
+    { type: "image", url: "https://i.imgur.com/0DRXav5.png" },
+    { type: "image", url: "https://i.imgur.com/oz8FlRR.png" },
+    { type: "image", url: "https://i.imgur.com/HNKsmcy.gif" },
+    { type: "video", url: "https://files.catbox.moe/tu6udl.mov" },
+  ];
+
+  const grid = document.getElementById("grid");
+  const lb = document.getElementById("lightbox");
+
+  document.getElementById("count").textContent =
+    media.length + " items";
+
+  document.getElementById("messageText").textContent =
+    message;
+
+  media.forEach(m => {
+    const btn = document.createElement("button");
+    btn.className = "item";
+
+    if (m.type === "image") {
+      btn.innerHTML =
+        '<img src="' + m.url + '" alt="" loading="lazy">';
+    } else {
+      btn.innerHTML =
+        '<video src="' + m.url + '" muted loop playsinline></video>' +
+        '<span class="tag">video</span>';
+
+      const v = btn.querySelector("video");
+
+      btn.addEventListener("mouseenter", () => v.play());
+
+      btn.addEventListener("mouseleave", () => {
+        v.pause();
+        v.currentTime = 0;
+      });
+    }
+
+    btn.addEventListener("click", () => openMedia(m));
+
+    grid.appendChild(btn);
+  });
+
+  function openMedia(m) {
+    lb.innerHTML =
+      m.type === "image"
+        ? '<img src="' + m.url + '" alt="">'
+        : '<video src="' + m.url + '" controls autoplay></video>';
+
+    lb.classList.add("open");
+  }
+
+  lb.addEventListener("click", () => {
+    lb.classList.remove("open");
+    lb.innerHTML = "";
+  });
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") {
+      lb.classList.remove("open");
+      lb.innerHTML = "";
+    }
+  });
+</script>
+
+</body>
+</html>
+```
